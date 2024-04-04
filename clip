@@ -1,0 +1,15 @@
+from osgeo import gdal
+import conda
+import os
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = None
+
+conda_file_dir = conda.__file__
+conda_dir = conda_file_dir.split('lib')[0]
+proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
+os.environ["PROJ_LIB"] = proj_lib
+
+input = "/scratch/bell/wang6211/fire/data/wind_speed_adaptor.esgf_wps.retrieve-1708199901.5728037-25838-4-4b6fbaa6-919a-41ca-8dd1-e1ef727f0230/sfcWind_Amon_EC-Earth3-Veg-LR_historical_r1i1p1f1_gr_20100116-20101216_v20200217.nc"
+output = "/scratch/bell/wang6211/fire/data/input/wind_speed.tif"
+shpin = "/scratch/bell/wang6211/fire/data/NAfiredata/shp/roi.shp"
+gdal.Warp(output, input, cutlineDSName=shpin, format="GTiff", cropToCutline=True)
