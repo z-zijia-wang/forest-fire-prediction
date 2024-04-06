@@ -1,0 +1,19 @@
+from osgeo import gdal
+import numpy as np
+import os
+
+os.environ['PROJ_LIB'] = r"/home/wang6211/.conda/envs/cent7/2020.02-py37/xarray/share/proj"
+
+arr=np.loadtxt("/scratch/bell/wang6211/fire/data/NAfiredata/fire_area.txt", delimiter="\t")
+arr = np.flip(arr,0)
+
+driver = gdal.GetDriverByName("GTiff")
+ds = driver.Create("/scratch/bell/wang6211/fire/data/NAfiredata/fire_area.tif", arr.shape[1], arr.shape[0], 1, gdal.GDT_Int16)
+ref = gdal.Open("/scratch/bell/wang6211/fire/data/proj/gpw_v4_population_density_rev11_2010_1_deg.tif")
+refarr = gdal.Open("/scratch/bell/wang6211/fire/data/proj/gpw_v4_population_density_rev11_2010_1_deg.tif").ReadAsArray()
+proj = ref.GetProjection()
+ds.SetProjection(proj)
+geotrans = ref.GetGeoTransform()
+ds.SetGeoTransform(geotrans)
+band = ds.GetRasterBand(1)
+band.WriteArray(arr)
