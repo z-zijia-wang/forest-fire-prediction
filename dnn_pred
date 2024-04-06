@@ -1,0 +1,50 @@
+import pandas
+import numpy as np
+
+# generate regression dataset
+dataset=pandas.read_csv('/home/wang6211/Downloads/forest+fires/forestfires.csv', sep=',', header=0)
+# Replacing infinite with nan
+dataset.replace([np.inf, -np.inf], np.nan, inplace=True)
+# Dropping all the rows with nan values
+dataset.dropna(inplace=True)
+
+X = np.array(dataset.iloc[:,[4,5,6,7,8,9,10,11]])
+y = np.array(dataset.iloc[:,12])
+
+# example of making predictions for a regression problem
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.datasets import make_regression
+from sklearn.preprocessing import MinMaxScaler
+from numpy import array
+# generate regression dataset
+scalarX, scalarY = MinMaxScaler(), MinMaxScaler()
+scalarX.fit(X)
+scalarY.fit(y.reshape(len(y),1))
+X = scalarX.transform(X)
+y = scalarY.transform(y.reshape(len(y),1))
+# define and fit the final model
+model = Sequential()
+model.add(Dense(4, input_shape=(8,), activation='relu'))
+model.add(Dense(4, activation='relu'))
+model.add(Dense(1, activation='linear'))
+model.compile(loss='mse', optimizer='adam')
+model.fit(X, y, epochs=1000, verbose=0)
+# new instance where we do not know the answer
+Xnew = X
+# make a prediction
+ynew = model.predict(Xnew)
+# show the inputs and predicted outputs
+print("X=%s, Predicted=%s" % (Xnew[0], ynew[0]))
+
+from sklearn import datasets
+from sklearn.model_selection import cross_val_predict
+from sklearn import linear_model
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.scatter(y, ynew, edgecolors=(0, 0, 0))
+ax.plot([ynew.min(), ynew.max()], [ynew.min(), ynew.max()], 'k--', lw=4)
+ax.set_xlabel('Measured')
+ax.set_ylabel('Predicted')
+plt.show()
