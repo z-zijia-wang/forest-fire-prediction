@@ -1,0 +1,29 @@
+import rioxarray
+import pandas
+import os
+
+path=os.listdir('/scratch/bell/wang6211/fire/data/input/')
+
+import PIL
+from PIL import Image
+import numpy
+import cv2 as cv
+from matplotlib import pyplot as plt
+import numpy as np
+
+PIL.Image.MAX_IMAGE_PIXELS = 436410765
+for f in path:
+    if f=="wind_speed.tif":
+        continue
+    im = rioxarray.open_rasterio('/scratch/bell/wang6211/fire/data/input/'+str(f))
+    im.show()
+    imarray = numpy.array(im)
+    if imarray.shape in [(12915, 33791),(33791, 12915),(3180, 13500),(13500, 3180)]:
+        continue
+    rds = cv.resize(imarray, (320, 160),
+                              interpolation=cv.INTER_LINEAR)
+    rds = rds.squeeze().drop("spatial_ref").drop("band")
+    rds.name = "data"
+    df = rds.to_dataframe().reset_index()
+    print(df)
+    df[df.data>=0.0].to_csv("out.csv", index=False)
