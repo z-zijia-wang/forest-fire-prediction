@@ -1,0 +1,27 @@
+import geopandas as gpd
+from shapely.geometry import Polygon
+import pandas as pd
+from shapely.geometry import  Point
+import conda
+import os
+
+conda_file_dir = conda.__file__
+conda_dir = conda_file_dir.split('lib')[0]
+proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
+os.environ["PROJ_LIB"] = proj_lib
+
+# Polygon
+df = pd.DataFrame([['A', -53.5, 70.0],
+['B', -166.0, 70.0],
+['C', -166.0, 43.5],
+['D', -53.5, 43.5]], columns=['index', 'Longitude', 'Latitude'])
+
+geom = [Point(xy) for xy in zip(df['Latitude'],df['Longitude'])]
+gdf = gpd.GeoDataFrame(df, crs='epsg:4326', geometry=geom)
+
+# polygon_geom = Polygon(zip(df['Longitude']/1e4,df['Latitude']/1e5))
+polygon_geom = Polygon(zip(df['Longitude'],df['Latitude']))
+polygon = gpd.GeoDataFrame(index=[0], crs='epsg:4326', geometry=[polygon_geom])
+
+polygon.sjoin(gdf, how='left')
+polygon.to_file(filename='/scratch/bell/wang6211/fire/data/NAfiredata/roi.shp', driver="ESRI Shapefile")
