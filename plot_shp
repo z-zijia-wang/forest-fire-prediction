@@ -1,0 +1,8 @@
+import geopandas as gpd
+from matplotlib import pyplot as plt
+
+# Displaying .shp data in Matplotlib
+gdf = gpd.read_file('/scratch/bell/wang6211/fire/data/NAfiredata/shp/roi.shp')
+print(gdf)
+gdf.plot()
+plt.show()
