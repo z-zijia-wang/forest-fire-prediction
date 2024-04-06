@@ -1,0 +1,33 @@
+# Import necessary modules first
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point, LineString, Polygon
+import fiona
+import matplotlib.pyplot as plt
+plt.style.use('bmh') # better for plotting geometries vs general plots.
+import conda
+import os
+
+conda_file_dir = conda.__file__
+conda_dir = conda_file_dir.split('lib')[0]
+proj_lib = os.path.join(os.path.join(conda_dir, 'share'), 'proj')
+os.environ["PROJ_LIB"] = proj_lib
+
+# list of coordindate pairs
+coordinates = [[-53.5, 70.0],
+[-166.0, 70.0],
+[-166.0, 43.5],
+[-53.5, 43.5]]
+
+
+# Create a Shapely polygon from the coordinate-tuple list
+ply_coord = Polygon(coordinates)
+
+# create a dictionary with needed attributes and required geometry column
+df = {'Attribute': ['name1'], 'geometry': ply_coord}
+
+# Convert shapely object to a geodataframe
+poly = gpd.GeoDataFrame(df, geometry='geometry', crs ="EPSG:4326")
+
+# Let's see what we have
+poly.plot()
