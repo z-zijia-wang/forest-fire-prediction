@@ -1,0 +1,31 @@
+import os
+path=os.listdir('/scratch/bell/wang6211/fire/data/input/')
+import PIL
+from PIL import Image
+import numpy
+import cv2 as cv
+from matplotlib import pyplot as plt
+import numpy as np
+
+PIL.Image.MAX_IMAGE_PIXELS = 436410765
+for f in path:
+    if f=="wind_speed.tif":
+        continue
+    im = Image.open('/scratch/bell/wang6211/fire/data/input/'+str(f))
+    # im.show()
+    imarray = numpy.array(im)
+    if f=="soil_moisture.tif":
+        imarray=np.flipud(imarray)
+    # print(f,imarray.shape)
+    # if imarray.shape[0]<imarray.shape[1]:
+    if imarray.shape in [(12915, 33791),(33791, 12915),(3180, 13500),(13500, 3180)]:
+        continue
+    stretch_near = cv.resize(imarray, (320, 160),
+                              interpolation=cv.INTER_LINEAR)
+    print(stretch_near.shape)
+    plt.imshow(imarray, interpolation='none')
+    plt.title(f)
+    plt.show()
+    plt.imshow(stretch_near, interpolation='none')
+    plt.title(f)
+    plt.show()
