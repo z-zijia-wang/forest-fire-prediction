@@ -1,0 +1,41 @@
+import numpy as np
+import pandas as pd
+import pygmt
+import xarray as xr
+from osgeo import gdal
+
+# Ordinary Dataframe
+df = pd.read_csv("/scratch/bell/wang6211/fire/data/NAfiredata/prep_fire_record.txt",
+                 usecols=[0,1,2,3,4],
+                 names=['lat','lon','year','severity','area'],
+                 sep='\t',
+                 skiprows=[0,1])
+print(df.head())
+
+# Turn XYZ data into 2D grid using Delaunay triangulation
+arr=xr.DataArray=pygmt.triangulate.regular_grid(
+    x=df.lon,
+    y=df.lat,
+    z=df.area,
+    region="d",  # global region from longitude -180 to +180
+    spacing="1d",  # 1 arc degree grid spacing
+)
+
+fig = pygmt.Figure()
+fig.grdimage(grid=df.area, frame=True, cmap="SCM/lajolla")
+fig.coast(shorelines="thinnest")
+fig.colorbar(frame=["x+ln", "y+lunits"])
+fig.show()
+
+from numpy import asarray
+from numpy import savetxt
+
+arr=np.array(arr)
+arr=np.delete(arr,0,1)
+arr=np.delete(arr,1,0)
+print(arr.shape)
+
+arr[np.isnan(arr)] = 0
+
+# save to csv file
+savetxt('/scratch/bell/wang6211/fire/data/NAfiredata/fire_area.txt', arr, delimiter='\t')
