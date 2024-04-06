@@ -1,0 +1,12 @@
+import os
+
+# folder path
+dir_path = r'/scratch/bell/wang6211/fire/data/ASTGTM'
+# list to store files
+res = []
+# Iterate directory
+for file in os.listdir(dir_path):
+    # check only text files
+    if file.endswith('num.tif'):
+        res.append(file)
+print(res)
