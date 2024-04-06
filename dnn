@@ -1,0 +1,209 @@
+# first neural network with keras tutorial
+from datetime import time
+
+from cycler import K
+from keras.saving.legacy.saved_model.load import metrics
+from numpy import loadtxt
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+import pandas
+# load the dataset
+dataset=pandas.read_csv('/home/wang6211/Downloads/dataframe.csv', sep=',', header=0)
+print(dataset.dtypes)
+# fire_area                     int64
+# soil_moisture               float64
+# relative_humidity           float64
+# biomass                     float64
+# precipitation               float64
+# near_surface_temperature    float64
+# fire_severity                 int64
+# population                  float64
+# wind_speed                  float64
+# dtype: object
+
+# split into input (X) and output (y) variables
+X = dataset.iloc[:,[1,2,3,4,5,7,8]]
+y = dataset.iloc[:,0]
+
+# example of making predictions for a regression problem
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.datasets import make_regression
+from sklearn.preprocessing import MinMaxScaler
+from numpy import array
+import pandas as pd
+import numpy as np
+from tensorflow.python.keras import optimizers
+from tensorflow.python.layers import layers
+
+# generate regression dataset
+dataset=pandas.read_csv('/home/wang6211/Downloads/dataframe.csv', sep=',', header=0)
+# Replacing infinite with nan
+dataset.replace([np.inf, -np.inf], np.nan, inplace=True)
+# Dropping all the rows with nan values
+dataset.dropna(inplace=True)
+
+X = dataset.iloc[:,[1,2,3,4,5,7,8]]
+y = dataset.iloc[:,0]
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                    test_size=0.3,
+                                                    random_state=20)
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model_0_ha = Sequential([
+    layers.BatchNormalization(input_shape=(X_train_scaled.shape[1],)),
+    layers.Dense(50),
+    layers.PReLU(),
+    layers.BatchNormalization(),
+    layers.AlphaDropout(0.2),
+    layers.Dense(25),
+    layers.PReLU(),
+    layers.BatchNormalization(),
+    layers.Dense(1, activation='relu'),
+])
+optimizer = optimizers.experimental.Adam(learning_rate=0.1)
+def max_mse_loss(y_true, y_pred):
+    return K.mean((y_true - y_pred)**2)
+
+model_0_ha._name = "model_male_0_ha"
+
+model_0_ha.compile(loss=max_mae_loss,
+                  optimizer = optimizer,
+                  metrics=[metrics.MeanSquaredError(),
+                         metrics.MeanAbsoluteError()])
+
+class CustomMetricsCallback:
+    pass
+
+custom_metrics_callback = CustomMetricsCallback()
+custom_metrics_callback.X_test = X_test_scaled
+custom_metrics_callback.y_test = y_test['Age']
+custom_metrics_callback.loss_name = 'CMASE'
+custom_metrics_callback.epoch_count = 50
+
+start_time = time.time()
+
+history = model_0_ha.fit(X_train_scaled, y_train['Age'],
+                         epochs=250,
+                         batch_size=100,
+                         callbacks=[custom_metrics_callback],
+                         verbose=0)
+
+end_time = time.time()
+execution_time = end_time - start_time
+
+prediction = model_0_ha.predict(X_test_scaled)
+
+from matplotlib import pyplot as plt
+# draw a histogram of the age column
+dataset['wind_speed'].hist()
+# add labels and title
+plt.xlabel('variable')
+plt.ylabel('Frequency')
+plt.show()
+
+X, y = make_regression(n_samples=100, n_features=2, noise=0.1, random_state=1)
+scalarX, scalarY = MinMaxScaler(), MinMaxScaler()
+scalarX.fit(X)
+scalarY.fit(y)
+X = scalarX.transform(X)
+y = scalarY.transform(y)
+# define and fit the final model
+model = Sequential()
+model.add(Dense(4, input_shape=(7,), activation='relu'))
+model.add(Dense(4, activation='relu'))
+model.add(Dense(1, activation='linear'))
+model.compile(loss='mse', optimizer='adam')
+model.fit(X, y, epochs=100, verbose=0)
+ynew = model.predict(X)
+print(ynew)
+# new instance where we do not know the answer
+# make a prediction
+# show the inputs and predicted outputs
+print("X=%s, Predicted=%s" % (ynew))
+
+df=pd.DataFrame()
+df.insert(0, "y", y)
+df.insert(1, "ynew", ynew)
+print(ynew)
+
+# train and evaluate a multilayer perceptron neural network on the housing regression dataset
+from pandas import read_csv
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+# load dataset
+url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/housing.csv'
+dataframe = read_csv(url, header=None)
+values = dataframe.values
+# split into input and output values
+X, y = values[:, :-1], values[:,-1]
+# split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.67, random_state=1)
+# scale input data
+scaler = MinMaxScaler()
+scaler.fit(X_train)
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+# define neural network model
+features = X_train.shape[1]
+model = Sequential()
+model.add(Dense(20, kernel_initializer='he_normal', activation='relu', input_dim=features))
+model.add(Dense(5, kernel_initializer='he_normal', activation='relu'))
+model.add(Dense(1))
+# compile the model and specify loss and optimizer
+opt = Adam(learning_rate=0.01, beta_1=0.85, beta_2=0.999)
+model.compile(optimizer=opt, loss='mse')
+# fit the model on the training dataset
+model.fit(X_train, y_train, verbose=2, epochs=300, batch_size=16)
+# make predictions on the test set
+yhat = model.predict(X_test, verbose=0)
+# calculate the average error in the predictions
+mae = mean_absolute_error(y_test, yhat)
+print('MAE: %.3f' % mae)
+
+print(y)
+print(X)
+print(y)
+y = dataset.iloc[:,6]
+# define and fit the final model
+model = Sequential()
+model.add(Dense(4, input_shape=(7,), activation='relu'))
+model.add(Dense(4, activation='relu'))
+model.add(Dense(1, activation='linear'))
+model.compile(loss='mse', optimizer='adam')
+model.fit(X, y, epochs=1000, verbose=0)
+# make a prediction
+ynew = model.predict(X)
+print(y)
+define the keras model
+model = Sequential()
+model.add(Dense(12, input_shape=(7,), activation='relu'))
+model.add(Dense(8, activation='relu'))
+# model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(units=128, activation='relu', input_dim=100))
+model.add(Dropout(0.5))
+model.add(Dense(units=64, activation='relu'))
+model.add(Dense(units=1, activation='sigmoid'))
+# compile the keras model
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# fit the keras model on the dataset
+model.fit(X, y, epochs=150, batch_size=64)
+# evaluate the keras model
+_, accuracy = model.evaluate(X, y)
+print('Accuracy: %.2f' % (accuracy*100))
+ynew = model.predict(X)
+print(ynew)
+from matplotlib import pyplot as plt
+
+axs = df.plot.area(figsize=(12, 4), subplots=True)
+plt.show()
