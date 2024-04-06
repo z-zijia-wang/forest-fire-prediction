@@ -1,0 +1,45 @@
+from osgeo import gdal
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+import os
+import rasterio
+import numpy as np
+import cv2 as cv
+import pandas as pd
+
+input=os.listdir("/scratch/bell/wang6211/fire/data/input/")
+
+for f in input:
+    raster_data = rasterio.open("/scratch/bell/wang6211/fire/data/roi/"+f)
+    gdal.Warp('/scratch/bell/wang6211/fire/data/reproj/'+f, "/scratch/bell/wang6211/fire/data/roi/"+f, xRes = -25000, yRes =25000, dstSRS="EPSG:4326")
+df=pd.DataFrame()
+
+for f in input:
+    if f == "surface_radiation_budget.tif":
+        continue
+    img=gdal.Open("/scratch/bell/wang6211/fire/data/input/"+f).ReadAsArray()
+    gdal.Warp('/scratch/bell/wang6211/fire/data/reproj/' + f, "/scratch/bell/wang6211/fire/data/roi/" + f, xRes=25000,
+              yRes=25000, dstSRS="EPSG:4326")
+    print(f)
+    print(img.shape)
+    stretch_near = cv.resize(img, (320, 160),
+                              interpolation=cv.INTER_LINEAR)
+    print(stretch_near.shape)
+    ft=stretch_near.flatten()
+    df[str(f[:-4:])]=ft.tolist()
+    fig = plt.figure()
+    plt.imshow(img,cmap='jet')
+    plt.imshow(img,cmap='jet',extent = (-180,180,-90,90))
+    plt.title(f)
+    plt.show()
+
+print(df)
+df.drop(df.loc[df['soil_moisture']==-9999.0].index, inplace=True)
+del df["surface_radiation_budget"]
+df.drop(df.loc[df['surface_radiation_budget']==-999.0].index, inplace=True)
+print(df)
+df.drop(columns='surface_radiation_budget')
+df.to_csv("/datadepot/rcac.purdue.edu/depot/wang6211/dataframe.csv", sep=',', index=False)
+
+df.to_csv("/home/wang6211/Downloads/glob_dataframe.csv", sep=',', index=False)
+print(df.head())
