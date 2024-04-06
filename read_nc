@@ -1,0 +1,58 @@
+import numpy as np
+import netCDF4 as nc
+from osgeo import gdal, osr, ogr
+import os
+import glob
+import datetime
+from osgeo import gdal
+import numpy as np
+from netCDF4 import Dataset
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# Reading the netCDF file
+data = Dataset(r'/scratch/bell/wang6211/fire/data/wind_speed_adaptor.esgf_wps.retrieve-1708199901.5728037-25838-4-4b6fbaa6-919a-41ca-8dd1-e1ef727f0230/sfcWind_Amon_EC-Earth3-Veg-LR_historical_r1i1p1f1_gr_20100116-20101216_v20200217.nc')
+input = ["/scratch/bell/wang6211/fire/data/wind_speed_adaptor.esgf_wps.retrieve-1708199901.5728037-25838-4-4b6fbaa6-919a-41ca-8dd1-e1ef727f0230/sfcWind_Amon_EC-Earth3-Veg-LR_historical_r1i1p1f1_gr_20100116-20101216_v20200217.nc"]
+print(data)
+
+Output_folder='/scratch/bell/wang6211/fire/data/input'
+
+# Creating a vairable 'sic' to store the 2-D array variable 'z'
+sic = np.array(data.variables['sfcWind'][4,:,:])
+print(sic)
+print(sic.shape)
+
+# Flipping the image upright in the axis = 0 i.e., vertically
+asi_sic = sic
+asi_sic = np.flip(sic)
+
+# Displaying the variable 'z' i.e., SIC
+cmmap = plt.cm.get_cmap("jet")
+cmmap.set_bad('dimgrey',1.)
+fig, ax = plt.subplots()
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='5%', pad=0.05)
+
+im = ax.imshow(asi_sic, cmap=cmmap)
+
+fig.colorbar(im, cax=cax, orientation='vertical',label='m s-1')
+
+ax.axes.xaxis.set_visible(False)
+ax.axes.yaxis.set_visible(False)
+plt.gcf().set_size_inches(15, 15)
+fig.set_dpi(300.0)
+plt.show()
+
+nc_data_obj = nc.Dataset(data)
+print(nc_data_obj.variables)
+Lon = nc_data_obj.variables['longitude'][:]
+Lat = nc_data_obj.variables['latitude'][:]
+u_arr = np.asarray(nc_data_obj.variables['sfcWind'])
+
+driver = gdal.GetDriverByName('GTiff')
+out_tif_name = Output_folder + '/' + 'wind_speed.tif'
+
+import rioxarray
+import xarray
+
+xds = xarray.open_dataset('D:\Weather data\et_01012018.nc')
